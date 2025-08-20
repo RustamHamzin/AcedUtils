@@ -1,0 +1,165 @@
+/* Custom CSS Variables for Theme Switching */
+:root {
+  --primary-color: #007bff;
+  --secondary-color: #6c757d;
+  --success-color: #28a745;
+  --info-color: #17a2b8;
+  --warning-color: #ffc107;
+  --danger-color: #dc3545;
+  --light-color: #f8f9fa;
+  --dark-color: #343a40;
+  --white-color: #ffffff;
+  --black-color: #000000;
+}
+
+/* Light Theme (Default) */
+body:not(.dark-mode) {
+  --bg-color: #f4f6f9;
+  --text-color: #495057;
+  --card-bg: #ffffff;
+  --border-color: #dee2e6;
+  --sidebar-bg: #343a40;
+  --navbar-bg: #ffffff;
+}
+
+/* Dark Theme */
+body.dark-mode {
+  --bg-color: #1a1a1a;
+  --text-color: #e9ecef;
+  --card-bg: #2d3748;
+  --border-color: #4a5568;
+  --sidebar-bg: #1a202c;
+  --navbar-bg: #2d3748;
+}
+
+/* Apply theme variables */
+body.dark-mode {
+  background-color: var(--bg-color) !important;
+  color: var(--text-color) !important;
+}
+
+body.dark-mode .content-wrapper {
+  background-color: var(--bg-color) !important;
+}
+
+body.dark-mode .main-header.navbar {
+  background-color: var(--navbar-bg) !important;
+  border-bottom: 1px solid var(--border-color) !important;
+}
+
+body.dark-mode .main-header.navbar .nav-link {
+  color: var(--text-color) !important;
+}
+
+body.dark-mode .main-sidebar {
+  background-color: var(--sidebar-bg) !important;
+}
+
+body.dark-mode .card {
+  background-color: var(--card-bg) !important;
+  border: 1px solid var(--border-color) !important;
+}
+
+body.dark-mode .card-header {
+  background-color: var(--card-bg) !important;
+  border-bottom: 1px solid var(--border-color) !important;
+  color: var(--text-color) !important;
+}
+
+body.dark-mode .table {
+  color: var(--text-color) !important;
+}
+
+body.dark-mode .table th,
+body.dark-mode .table td {
+  border-color: var(--border-color) !important;
+}
+
+body.dark-mode .info-box {
+  background-color: var(--card-bg) !important;
+  color: var(--text-color) !important;
+}
+
+body.dark-mode .small-box {
+  color: #ffffff !important;
+}
+
+body.dark-mode .main-footer {
+  background-color: var(--card-bg) !important;
+  border-top: 1px solid var(--border-color) !important;
+  color: var(--text-color) !important;
+}
+
+body.dark-mode .alert-info {
+  background-color: rgba(23, 162, 184, 0.1) !important;
+  border-color: rgba(23, 162, 184, 0.2) !important;
+  color: var(--text-color) !important;
+}
+
+/* Theme toggle button */
+#theme-toggle {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+#theme-toggle:hover {
+  transform: scale(1.1);
+}
+
+/* Smooth transitions */
+body,
+.content-wrapper,
+.main-header.navbar,
+.main-sidebar,
+.card,
+.card-header,
+.table,
+.info-box,
+.main-footer {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Custom animations */
+.small-box {
+  transition: transform 0.2s ease;
+}
+
+.small-box:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+  .small-box h3 {
+    font-size: 1.5rem;
+  }
+  
+  .brand-text {
+    display: none;
+  }
+}
+
+/* Loading animation */
+.loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Custom scrollbar for dark mode */
+body.dark-mode ::-webkit-scrollbar {
+  width: 8px;
+}
+
+body.dark-mode ::-webkit-scrollbar-track {
+  background: var(--bg-color);
+}
+
+body.dark-mode ::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}
+
+body.dark-mode ::-webkit-scrollbar-thumb:hover {
+  background: #6c757d;
+}

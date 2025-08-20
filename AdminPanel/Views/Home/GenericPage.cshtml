@@ -1,0 +1,54 @@
+@{
+    ViewData["Title"] = ViewBag.PageTitle;
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">@ViewBag.PageTitle</h3>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <h5><i class="icon fas fa-info"></i> Информация</h5>
+                    Это демонстрационная страница для раздела "@ViewBag.PageTitle". 
+                    Здесь будет размещен соответствующий функционал.
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="info-box">
+                            <span class="info-box-icon bg-info"><i class="fas fa-cog"></i></span>
+                            <div class="info-box-content">
+                                <span class="info-box-text">Статус</span>
+                                <span class="info-box-number">Активно</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-box">
+                            <span class="info-box-icon bg-success"><i class="fas fa-check"></i></span>
+                            <div class="info-box-content">
+                                <span class="info-box-text">Обновлено</span>
+                                <span class="info-box-number">Сегодня</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <h5>Функционал раздела</h5>
+                    <p>В данном разделе будут реализованы следующие возможности:</p>
+                    <ul>
+                        <li>Просмотр данных</li>
+                        <li>Добавление новых записей</li>
+                        <li>Редактирование существующих записей</li>
+                        <li>Удаление записей</li>
+                        <li>Экспорт данных</li>
+                        <li>Поиск и фильтрация</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

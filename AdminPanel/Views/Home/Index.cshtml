@@ -1,0 +1,224 @@
+@model List<AdminPanel.Models.DashboardCard>
+@{
+    ViewData["Title"] = "Главная";
+}
+
+<div class="row">
+    @foreach (var card in Model)
+    {
+        <div class="col-lg-3 col-6">
+            <div class="small-box bg-@card.Color">
+                <div class="inner">
+                    <h3>@card.Value</h3>
+                    <p>@card.Title</p>
+                </div>
+                <div class="icon">
+                    <i class="@card.Icon"></i>
+                </div>
+                <a href="@card.Url" class="small-box-footer">
+                    Подробнее <i class="fas fa-arrow-circle-right"></i>
+                </a>
+            </div>
+        </div>
+    }
+</div>
+
+@if (User.HasClaim(System.Security.Claims.ClaimTypes.Role, "Admin"))
+{
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-chart-pie mr-1"></i>
+                        Статистика договоров
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <canvas id="pieChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-chart-bar mr-1"></i>
+                        Показания по месяцам
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <canvas id="barChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@if (User.HasClaim(System.Security.Claims.ClaimTypes.Role, "Manager"))
+{
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-tasks mr-1"></i>
+                        Последние задачи
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Задача</th>
+                                    <th>Статус</th>
+                                    <th>Дата</th>
+                                    <th>Приоритет</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Проверка показаний счетчика №1234</td>
+                                    <td><span class="badge badge-warning">В работе</span></td>
+                                    <td>15.12.2024</td>
+                                    <td><span class="badge badge-danger">Высокий</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Обработка обращения клиента</td>
+                                    <td><span class="badge badge-success">Завершено</span></td>
+                                    <td>14.12.2024</td>
+                                    <td><span class="badge badge-info">Средний</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@if (User.HasClaim(System.Security.Claims.ClaimTypes.Role, "Client"))
+{
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-history mr-1"></i>
+                        История показаний
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Дата</th>
+                                    <th>Показание</th>
+                                    <th>Статус</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>01.12.2024</td>
+                                    <td>1,234 кВт</td>
+                                    <td><span class="badge badge-success">Принято</span></td>
+                                </tr>
+                                <tr>
+                                    <td>01.11.2024</td>
+                                    <td>1,198 кВт</td>
+                                    <td><span class="badge badge-success">Принято</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-credit-card mr-1"></i>
+                        Последние платежи
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Дата</th>
+                                    <th>Сумма</th>
+                                    <th>Статус</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>05.12.2024</td>
+                                    <td>2,450 ₽</td>
+                                    <td><span class="badge badge-success">Оплачено</span></td>
+                                </tr>
+                                <tr>
+                                    <td>05.11.2024</td>
+                                    <td>2,380 ₽</td>
+                                    <td><span class="badge badge-success">Оплачено</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    @if (User.HasClaim(System.Security.Claims.ClaimTypes.Role, "Admin"))
+    {
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script>
+            // Pie Chart
+            var pieChartCanvas = document.getElementById('pieChart').getContext('2d');
+            var pieChart = new Chart(pieChartCanvas, {
+                type: 'pie',
+                data: {
+                    labels: ['Активные', 'В обработке', 'Завершенные'],
+                    datasets: [{
+                        data: [1247, 156, 23],
+                        backgroundColor: ['#28a745', '#ffc107', '#dc3545']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+
+            // Bar Chart
+            var barChartCanvas = document.getElementById('barChart').getContext('2d');
+            var barChart = new Chart(barChartCanvas, {
+                type: 'bar',
+                data: {
+                    labels: ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн'],
+                    datasets: [{
+                        label: 'Показания',
+                        data: [65, 59, 80, 81, 56, 55],
+                        backgroundColor: '#007bff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        </script>
+    }
+}
