@@ -1,4 +1,4 @@
-namespace AdminPanel.Models
+namespace RabbitMQWebApp.Models
 {
     public class ErrorViewModel
     {

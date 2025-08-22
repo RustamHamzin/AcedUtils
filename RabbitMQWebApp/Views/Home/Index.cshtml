@@ -1,0 +1,286 @@
+@model List<RabbitMQWebApp.Models.DataRecord>
+@{
+    ViewData["Title"] = "Управление записями";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mt-4 mb-3">
+            <h2><i class="fas fa-table me-2"></i>Управление записями</h2>
+            <div>
+                <span class="badge bg-info me-2">Всего записей: @Model.Count</span>
+                <span id="selectedCount" class="badge bg-secondary">Выбрано: 0</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="table-container">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="selectAll">
+                    <label class="form-check-label fw-bold" for="selectAll">
+                        Выделить все записи
+                    </label>
+                </div>
+                <button id="sendButton" class="btn btn-send" onclick="sendSelectedRecords()" disabled>
+                    <span class="loading-spinner me-2"></span>
+                    <i class="fas fa-paper-plane me-2"></i>
+                    Отправить выбранные записи
+                </button>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th width="50">
+                                <input type="checkbox" id="headerCheckbox" onchange="toggleAll()">
+                            </th>
+                            <th>ID</th>
+                            <th>Название</th>
+                            <th>Статус</th>
+                            <th>Дата создания</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var record in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <input type="checkbox" class="record-checkbox" value="@record.Id" onchange="updateSelection()">
+                                </td>
+                                <td><strong>@record.Id</strong></td>
+                                <td>@record.Name</td>
+                                <td>
+                                    <span class="status-badge @GetStatusClass(record.Status)">
+                                        @record.Status
+                                    </span>
+                                </td>
+                                <td>@record.DateCreated.ToString("dd.MM.yyyy HH:mm")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast для уведомлений -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="notificationToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+            <i id="toastIcon" class="fas fa-info-circle me-2"></i>
+            <strong class="me-auto" id="toastTitle">Уведомление</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body" id="toastMessage">
+            Сообщение
+        </div>
+    </div>
+</div>
+
+@functions {
+    private string GetStatusClass(string status)
+    {
+        return status switch
+        {
+            "Активный" => "status-active",
+            "Неактивный" => "status-inactive",
+            "В обработке" => "status-processing",
+            "Завершен" => "status-completed",
+            "Отменен" => "status-cancelled",
+            _ => "status-active"
+        };
+    }
+}
+
+@section Scripts {
+    <script>
+        let selectedRecords = new Set();
+
+        // Инициализация при загрузке страницы
+        $(document).ready(function() {
+            updateSelection();
+            
+            // Синхронизация чекбоксов "Выделить все"
+            $('#selectAll').on('change', function() {
+                $('#headerCheckbox').prop('checked', this.checked);
+                toggleAll();
+            });
+        });
+
+        // Переключение всех чекбоксов
+        function toggleAll() {
+            const isChecked = $('#headerCheckbox').is(':checked');
+            $('.record-checkbox').prop('checked', isChecked);
+            $('#selectAll').prop('checked', isChecked);
+            updateSelection();
+        }
+
+        // Обновление состояния выбора
+        function updateSelection() {
+            selectedRecords.clear();
+            
+            $('.record-checkbox:checked').each(function() {
+                selectedRecords.add(parseInt($(this).val()));
+            });
+
+            // Обновление счетчика
+            $('#selectedCount').text(`Выбрано: ${selectedRecords.size}`);
+            
+            // Обновление состояния кнопки
+            const sendButton = $('#sendButton');
+            if (selectedRecords.size > 0) {
+                sendButton.prop('disabled', false);
+                sendButton.removeClass('btn-secondary').addClass('btn-send');
+            } else {
+                sendButton.prop('disabled', true);
+                sendButton.removeClass('btn-send').addClass('btn-secondary');
+            }
+
+            // Обновление состояния главного чекбокса
+            const totalCheckboxes = $('.record-checkbox').length;
+            const checkedCheckboxes = $('.record-checkbox:checked').length;
+            
+            const headerCheckbox = $('#headerCheckbox');
+            const selectAllCheckbox = $('#selectAll');
+            
+            if (checkedCheckboxes === 0) {
+                headerCheckbox.prop('indeterminate', false).prop('checked', false);
+                selectAllCheckbox.prop('indeterminate', false).prop('checked', false);
+            } else if (checkedCheckboxes === totalCheckboxes) {
+                headerCheckbox.prop('indeterminate', false).prop('checked', true);
+                selectAllCheckbox.prop('indeterminate', false).prop('checked', true);
+            } else {
+                headerCheckbox.prop('indeterminate', true).prop('checked', false);
+                selectAllCheckbox.prop('indeterminate', true).prop('checked', false);
+            }
+        }
+
+        // Отправка выбранных записей
+        async function sendSelectedRecords() {
+            if (selectedRecords.size === 0) {
+                showNotification('Предупреждение', 'Выберите хотя бы одну запись для отправки', 'warning');
+                return;
+            }
+
+            const sendButton = $('#sendButton');
+            const spinner = sendButton.find('.loading-spinner');
+            const icon = sendButton.find('.fas');
+            
+            // Показать индикатор загрузки
+            sendButton.prop('disabled', true);
+            spinner.show();
+            icon.hide();
+
+            try {
+                const response = await fetch('/Home/SendSelectedRecords', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(Array.from(selectedRecords))
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showNotification('Успех', result.message, 'success');
+                    
+                    // Очистить выбор после успешной отправки
+                    $('.record-checkbox').prop('checked', false);
+                    $('#headerCheckbox').prop('checked', false);
+                    $('#selectAll').prop('checked', false);
+                    updateSelection();
+                } else {
+                    showNotification('Ошибка', result.message, 'danger');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showNotification('Ошибка', 'Произошла ошибка при отправке данных', 'danger');
+            } finally {
+                // Скрыть индикатор загрузки
+                spinner.hide();
+                icon.show();
+                
+                if (selectedRecords.size > 0) {
+                    sendButton.prop('disabled', false);
+                }
+            }
+        }
+
+        // Тест подключения к RabbitMQ
+        async function testConnection() {
+            try {
+                const response = await fetch('/Home/TestConnection');
+                const result = await response.json();
+                
+                if (result.success) {
+                    showConnectionStatus('Подключение к RabbitMQ успешно', 'success');
+                } else {
+                    showConnectionStatus('Не удалось подключиться к RabbitMQ', 'danger');
+                }
+            } catch (error) {
+                console.error('Connection test error:', error);
+                showConnectionStatus('Ошибка при тестировании подключения', 'danger');
+            }
+        }
+
+        // Показать уведомление
+        function showNotification(title, message, type) {
+            const toast = $('#notificationToast');
+            const toastTitle = $('#toastTitle');
+            const toastMessage = $('#toastMessage');
+            const toastIcon = $('#toastIcon');
+            
+            // Установить иконку в зависимости от типа
+            let iconClass = 'fas fa-info-circle';
+            switch(type) {
+                case 'success':
+                    iconClass = 'fas fa-check-circle text-success';
+                    break;
+                case 'danger':
+                    iconClass = 'fas fa-exclamation-circle text-danger';
+                    break;
+                case 'warning':
+                    iconClass = 'fas fa-exclamation-triangle text-warning';
+                    break;
+            }
+            
+            toastIcon.attr('class', iconClass);
+            toastTitle.text(title);
+            toastMessage.text(message);
+            
+            // Показать toast
+            const bsToast = new bootstrap.Toast(toast[0], {
+                autohide: true,
+                delay: 5000
+            });
+            bsToast.show();
+        }
+
+        // Показать статус подключения
+        function showConnectionStatus(message, type) {
+            const statusDiv = $('#connectionStatus');
+            const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+            const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+            
+            statusDiv.html(`
+                <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
+                    <i class="fas ${icon} me-2"></i>
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `);
+            
+            // Автоматически скрыть через 5 секунд
+            setTimeout(() => {
+                statusDiv.find('.alert').alert('close');
+            }, 5000);
+        }
+    </script>
+}
